@@ -128,9 +128,9 @@ body.panel-open #panel{transform:none}
 
 .imp{display:flex;gap:8px;flex-wrap:wrap}
 .imp.tight{flex-wrap:nowrap}
-.imp.tight .pill{min-width:0;padding:0 13px}
-.imp.tight .pill span{overflow:hidden;text-overflow:ellipsis}
-.imp.tight #btnSync{flex:1 1 auto}
+.imp.tight .pill{flex:none;padding:0 13px}
+.imp.tight #btnSync{flex:1 1 0;min-width:0}
+.imp.tight #btnSync span{overflow:hidden;text-overflow:ellipsis}
 
 .seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--fill-2);border-radius:12px;padding:3px;gap:2px}
 .seg button{height:32px;border-radius:9px;color:var(--mute);font-weight:550;transition:background .15s,color .15s}
