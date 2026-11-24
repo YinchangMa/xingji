@@ -468,9 +468,9 @@ function drawProfile(cursorIdx = -1) {
     g.beginPath(); g.moveTo(0, h);
     for (let i = 0; i < n; i += step) g.lineTo(X(i), Y(tr.spd[i]));
     g.lineTo(w, h); g.closePath();
-    g.globalAlpha = .28; g.fillStyle = lg; g.fill(); g.globalAlpha = 1;
+    g.globalAlpha = .22; g.fillStyle = lg; g.fill(); g.globalAlpha = 1;
     g.beginPath(); for (let i = 0; i < n; i += step) i ? g.lineTo(X(i), Y(tr.spd[i])) : g.moveTo(X(i), Y(tr.spd[i]));
-    g.strokeStyle = lg; g.lineWidth = 1.6; g.stroke();
+    g.strokeStyle = lg; g.lineWidth = 2; g.lineJoin = 'round'; g.stroke();
   }
   // 海拔线
   if (tr.ele) {
@@ -479,10 +479,10 @@ function drawProfile(cursorIdx = -1) {
     const Y = e => h - 4 - (e - lo) / (hi - lo) * (h - 10);
     g.beginPath(); let started = false;
     for (let i = 0; i < n; i += step) { const e = tr.ele[i]; if (!isFinite(e)) continue; started ? g.lineTo(X(i), Y(e)) : g.moveTo(X(i), Y(e)); started = true; }
-    g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 1.2; g.setLineDash([3, 3]); g.stroke(); g.setLineDash([]);
+    g.strokeStyle = 'rgba(15,27,45,.38)'; g.lineWidth = 1.2; g.setLineDash([3, 3]); g.stroke(); g.setLineDash([]);
   }
-  if (!tr.spd && !tr.ele) { g.fillStyle = '#9aa4b2'; g.font = '12px system-ui'; g.fillText('这条轨迹没有时间和海拔数据', 8, h / 2); }
-  if (cursorIdx >= 0) { const x = X(cursorIdx); g.strokeStyle = '#fff'; g.lineWidth = 1; g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke(); }
+  if (!tr.spd && !tr.ele) { g.fillStyle = '#98a2b1'; g.font = '12px system-ui'; g.fillText('这条轨迹没有时间和海拔数据', 8, h / 2); }
+  if (cursorIdx >= 0) { const x = X(cursorIdx); g.strokeStyle = 'rgba(15,27,45,.7)'; g.lineWidth = 1; g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke(); }
 }
 
 let cursorMarker = null;

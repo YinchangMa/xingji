@@ -13,12 +13,14 @@ def make(size, maskable=False):
     S = 1024
     im = Image.new('RGBA', (S, S), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
-    # 背景：深色渐变（模拟夜间卫星图）
+    # 背景：白 → 浅薄荷绿的斜向渐变（清新浅色主题）
     bg = Image.new('RGBA', (S, S))
-    bd = ImageDraw.Draw(bg)
+    px = bg.load()
     for y in range(S):
-        f = y / S
-        bd.line([(0, y), (S, y)], fill=(int(18 + 10 * f), int(32 + 12 * f), int(38 + 8 * f), 255))
+        for x in range(0, S, 4):
+            f = (x + y) / (2 * S)
+            c = (int(255 - 30 * f), int(255 - 12 * f), int(255 - 22 * f), 255)
+            for k in range(4): px[x + k, y] = c
     mask = Image.new('L', (S, S), 0)
     md = ImageDraw.Draw(mask)
     if maskable: md.rectangle([0, 0, S, S], fill=255)
@@ -31,7 +33,7 @@ def make(size, maskable=False):
     # 描边阴影
     sh = Image.new('RGBA', (S, S), (0, 0, 0, 0)); sd = ImageDraw.Draw(sh)
     for (x, y) in path:
-        r = 50 * sc; sd.ellipse([x - r, y - r, x + r, y + r], fill=(0, 0, 0, 120))
+        r = 46 * sc; sd.ellipse([x - r, y - r + 10 * sc, x + r, y + r + 10 * sc], fill=(10, 60, 50, 38))
     im.alpha_composite(sh)
     # 渐变线（蓝→绿→黄→橙）
     stops = [(64, 120, 255), (25, 211, 230), (61, 220, 74), (255, 210, 31), (255, 140, 26)]

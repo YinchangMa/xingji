@@ -1,7 +1,7 @@
 /* Service Worker：缓存应用本身（离线可打开），接收「分享到行迹」的 GPX 文件。
  * 卫星瓦片不在这里缓存（跨域瓦片缓存会大量占用配额），交给浏览器自身的 HTTP 缓存。 */
-const VER = 'xingji-v1';
-const SHELL = ['./', './index.html', './style.css', './app.js', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png',
+const VER = 'xingji-v2';
+const SHELL = ['./', './index.html', './style.css?v=2', './app.js?v=2', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'];
 
 self.addEventListener('install', e => {

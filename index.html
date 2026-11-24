@@ -5,16 +5,16 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>行迹</title>
 <meta name="description" content="把 GPX 轨迹叠加到卫星地图上回看">
-<meta name="theme-color" content="#0e1116">
+<meta name="theme-color" content="#f5f7f6">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="行迹">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" href="icons/icon-192.png?v=2">
+<link rel="apple-touch-icon" href="icons/icon-192.png?v=2">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
 <div id="map"></div>
@@ -53,7 +53,7 @@
 <aside id="panel" class="glass">
   <div class="grab"></div>
   <header class="p-head">
-    <div class="brand"><img src="icons/icon-192.png" alt=""><div><b>行迹</b><small id="sumLine">还没有轨迹</small></div></div>
+    <div class="brand"><img src="icons/icon-192.png?v=2" alt=""><div><b>行迹</b><small id="sumLine">还没有轨迹</small></div></div>
     <button class="icon-btn" id="pClose" title="关闭"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
   </header>
 
@@ -109,7 +109,7 @@
 </div>
 
 <div id="empty" class="glass" hidden>
-  <img src="icons/icon-192.png" alt="">
+  <img src="icons/icon-192.png?v=2" alt="">
   <h2>把你的路，铺在卫星图上</h2>
   <p>选择存放 GPX 的文件夹（两步路、六只脚导出的都行）。导入后保存在本机，下次打开直接显示最近一条。</p>
   <div class="imp">
@@ -123,6 +123,6 @@
 <input type="file" id="inDir" webkitdirectory multiple hidden>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="app.js"></script>
+<script src="app.js?v=2"></script>
 </body>
 </html>
