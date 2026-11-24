@@ -11,6 +11,8 @@ const BUILTIN_SOURCES = [
   { id: 'esri',   name: 'Esri 卫星',        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', maxNative: 19, crs: 'wgs', attr: 'Esri, Maxar, Earthstar Geographics' },
   { id: 'bing',   name: 'Bing 卫星',        url: 'https://ecn.t{s}.tiles.virtualearth.net/tiles/a{q}.jpeg?g=14000', sub: '0123', maxNative: 19, crs: 'wgs', attr: '© Microsoft' },
   { id: 'a-sat',  name: '高德卫星',         url: 'https://webst0{s}.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}', sub: '1234', maxNative: 18, crs: 'gcj', attr: '© 高德' },
+  { id: 'a-hyb',  name: '高德卫星 + 路网',  url: 'https://webst0{s}.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}', sub: '1234', maxNative: 18, crs: 'gcj', attr: '© 高德',
+    overlay: 'https://webst0{s}.is.autonavi.com/appmaptile?style=8&x={x}&y={y}&z={z}' },
   { id: 'g-road', name: '谷歌街道',         url: 'https://mt{s}.google.com/vt/lyrs=m&hl=zh-CN&x={x}&y={y}&z={z}&scale=2', sub: '0123', maxNative: 21, crs: 'wgs', attr: '© Google' },
 ];
 const MAX_ZOOM = 22;
@@ -300,17 +302,21 @@ const QuadLayer = L.TileLayer.extend({
     return L.Util.template(this._url, L.extend({ s: this._getSubdomain(c), x: c.x, y: c.y, z, q, '-y': (1 << z) - 1 - c.y }, this.options));
   },
 });
-let baseLayer = null, curSrc = null;
+let baseLayer = null, roadLayer = null, curSrc = null;
 const allSources = () => [...BUILTIN_SOURCES, ...S.custom];
 function setSource(id) {
   const src = allSources().find(s => s.id === id) || BUILTIN_SOURCES[0];
   const crsChanged = curSrc && curSrc.crs !== src.crs;
   curSrc = src; S.src = src.id; saveS();
   if (baseLayer) map.removeLayer(baseLayer);
-  baseLayer = new QuadLayer(src.url, {
+  if (roadLayer) { map.removeLayer(roadLayer); roadLayer = null; }
+  const opt = {
     subdomains: src.sub || 'abc', maxNativeZoom: +src.maxNative || 19, maxZoom: MAX_ZOOM,
     attribution: src.attr || src.name, crossOrigin: false, keepBuffer: 3, updateWhenZooming: false,
-  }).addTo(map);
+  };
+  baseLayer = new QuadLayer(src.url, { ...opt, zIndex: 1 }).addTo(map);
+  // 透明路网叠加层（背景为空，只有道路和地名），叠在卫星图上面
+  if (src.overlay) roadLayer = new QuadLayer(src.overlay, { ...opt, attribution: '', zIndex: 2 }).addTo(map);
   if (crsChanged) { projCache.clear(); refresh(); }
   renderSources();
 }
@@ -616,7 +622,6 @@ $('#nsAdd').onclick = () => {
 
 /* ---------------- 统一刷新 ---------------- */
 function refresh() {
-  $('#empty').hidden = TRACKS.length > 0;
   drawTracks(); renderChip(); renderPanel();
   if (cardTrack && !byId.has(cardTrack.id)) hideCard();
   // 当前只看一条时，详情卡随之切换
@@ -635,8 +640,8 @@ $('#chip').onclick = () => {
 };
 $('#cClose').onclick = hideCard;
 $('#btnPlay').onclick = () => playing ? stopPlay() : startPlay();
-$('#btnDir').onclick = $('#eDir').onclick = pickDir;
-$('#btnFiles').onclick = $('#eFiles').onclick = () => $('#inFiles').click();
+$('#btnDir').onclick = pickDir;
+$('#btnFiles').onclick = () => $('#inFiles').click();
 $('#btnSync').onclick = () => syncDir(true);
 for (const id of ['#inFiles', '#inDir']) $(id).onchange = async e => {
   const n = await importFiles(e.target.files); e.target.value = '';
@@ -686,8 +691,12 @@ new ResizeObserver(() => { map.invalidateSize(); if (cardTrack) drawProfile(); }
 /* ---------------- 启动 ---------------- */
 (async function boot() {
   setSource(S.src);
-  map.setView([22.30, 39.10], 10);
+  // 没有轨迹时回到上次看的位置（纯看卫星图也能用）
+  let lastView = null; try { lastView = JSON.parse(localStorage.getItem('xj.view')); } catch {}
+  if (lastView) map.setView([lastView[0], lastView[1]], lastView[2]); else map.setView([22.30, 39.10], 10);
+  map.on('moveend', () => { const c = map.getCenter(); try { localStorage.setItem('xj.view', JSON.stringify([+c.lat.toFixed(6), +c.lng.toFixed(6), map.getZoom()])); } catch {} });
   try { await loadLibrary(); } catch (e) { console.error(e); toast('读取本机轨迹库失败'); }
+  if (!TRACKS.length && !localStorage.getItem('xj.hinted')) { toast('想看轨迹时，点右下角 ☰ 导入 GPX', 4000); try { localStorage.setItem('xj.hinted', '1'); } catch {} }
   for (const id of [...S.picked]) if (!byId.has(id)) S.picked.delete(id);
   if (S.mode === 'pick' && !S.picked.size) S.mode = 'latest';
   fitNext = true;

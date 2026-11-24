@@ -196,11 +196,6 @@ body.panel-open #panel{transform:none}
 .addsrc .pill{margin-top:10px;width:100%}
 
 /* 空状态 */
-#empty{position:fixed;z-index:650;left:50%;top:50%;transform:translate(-50%,-50%);width:min(380px,calc(100vw - 32px));border-radius:28px;padding:28px 24px 24px;text-align:center;background:var(--glass-strong)}
-#empty img{width:68px;height:68px;border-radius:18px;box-shadow:var(--shadow)}
-#empty h2{margin:16px 0 6px;font-size:20px;font-weight:750;letter-spacing:.5px}
-#empty p{color:var(--mute);margin:0 0 20px;font-size:13.5px}
-#empty .imp{justify-content:center}
 
 #toast{position:fixed;z-index:900;left:50%;top:calc(70px + var(--sat));transform:translate(-50%,-10px);background:rgba(15,27,45,.9);color:#fff;
   padding:9px 16px;border-radius:14px;font-size:13px;font-weight:550;opacity:0;pointer-events:none;transition:.25s;max-width:90vw;text-align:center;box-shadow:var(--shadow)}
