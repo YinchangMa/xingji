@@ -9,13 +9,14 @@
 
 ## 本地运行（电脑）
 ```
-python -m http.server 8765 --directory gpx-map
+cd xingji
+python -m http.server 8765
 ```
 浏览器打开 http://localhost:8765 。Chrome / Edge 可以点地址栏的「安装」图标装成桌面应用。
 
 ## 手机上用
-PWA 需要 https。把 `gpx-map` 文件夹整个放到任意静态托管（GitHub Pages、Cloudflare Pages、Netlify 拖拽上传都行），
-手机 Chrome 打开后 菜单 →「添加到主屏幕 / 安装应用」。
+已部署在 https://yinchangma.github.io/xingji/ 。手机 Chrome 打开后 菜单 →「添加到主屏幕 / 安装应用」。
+（PWA 需要 https；也可以把本文件夹放到 Cloudflare Pages、Netlify 等任意静态托管。）
 
 临时测试（手机 USB 连电脑）：`adb reverse tcp:8765 tcp:8765`，然后手机 Chrome 打开 http://localhost:8765 。
 
