@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>行迹</title>
+<meta name="description" content="把 GPX 轨迹叠加到卫星地图上回看">
+<meta name="theme-color" content="#0e1116">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="行迹">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="map"></div>
+
+<!-- 顶部信息条：当前轨迹名 + 关键数据，点击展开详情 -->
+<button id="chip" class="glass hud" hidden>
+  <span class="chip-dot"></span>
+  <span class="chip-main"><b id="chipTitle"></b><small id="chipSub"></small></span>
+</button>
+
+<!-- 右下角三个小按钮 -->
+<div id="fabs" class="hud">
+  <button class="fab glass" id="btnLib" title="轨迹库"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></button>
+  <button class="fab glass" id="btnLayers" title="图源"><svg viewBox="0 0 24 24"><path d="M12 3 2 8l10 5 10-5-10-5Z"/><path d="m2 13 10 5 10-5"/></svg></button>
+  <button class="fab glass" id="btnFit" title="回到轨迹"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+</div>
+
+<!-- 轨迹详情卡 -->
+<section id="card" class="glass hud" hidden>
+  <div class="card-head">
+    <div class="card-title"><b id="cTitle"></b><small id="cDate"></small></div>
+    <button class="icon-btn" id="cClose" title="收起"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+  </div>
+  <div class="stats" id="cStats"></div>
+  <div class="profile">
+    <canvas id="prof"></canvas>
+    <div class="prof-read" id="profRead"></div>
+  </div>
+  <div class="card-foot">
+    <div class="legend" id="legend"></div>
+    <button class="pill" id="btnPlay"><svg viewBox="0 0 24 24"><path d="M7 5v14l12-7z"/></svg><span>回放</span></button>
+  </div>
+</section>
+
+<!-- 轨迹库面板 -->
+<aside id="panel" class="glass">
+  <div class="grab"></div>
+  <header class="p-head">
+    <div class="brand"><img src="icons/icon-192.png" alt=""><div><b>行迹</b><small id="sumLine">还没有轨迹</small></div></div>
+    <button class="icon-btn" id="pClose" title="关闭"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </header>
+
+  <div class="achv" id="achv"></div>
+
+  <div class="imp tight">
+    <button class="pill primary" id="btnSync" hidden><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.9-3M4 4v4h4M4 13a8 8 0 0 0 14.9 3M20 20v-4h-4"/></svg><span id="syncName">同步文件夹</span></button>
+    <button class="pill" id="btnDir" title="选择文件夹"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span id="dirLabel">选择文件夹</span></button>
+    <button class="pill" id="btnFiles" title="选择 GPX 文件"><svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M12 12v6M9 15h6"/></svg><span>文件</span></button>
+  </div>
+
+  <div class="seg" id="seg">
+    <button data-m="latest">最近一条</button>
+    <button data-m="pick">已选 <i id="pickN">0</i></button>
+    <button data-m="all">全部</button>
+  </div>
+  <div class="filters">
+    <select id="yearSel"></select>
+    <input id="q" type="search" placeholder="搜索轨迹名">
+  </div>
+
+  <div class="list" id="list"></div>
+
+  <details class="settings">
+    <summary>设置</summary>
+    <label class="row">GPX 坐标系
+      <select id="setCrs"><option value="wgs">WGS-84（GPS 原始，默认）</option><option value="gcj">GCJ-02（火星坐标）</option></select>
+    </label>
+    <label class="row">单条轨迹着色
+      <select id="setColor"><option value="speed">按速度渐变</option><option value="solid">单色</option></select>
+    </label>
+    <label class="row">线宽 <input type="range" id="setWidth" min="2" max="9" step="1"></label>
+    <label class="row">显示起点/终点 <input type="checkbox" id="setEnds"></label>
+    <p class="hint">提示：轻点地图空白处可隐藏所有按钮，再点一下恢复。数据只保存在本机浏览器里。</p>
+    <button class="pill danger" id="btnWipe">清空轨迹库</button>
+  </details>
+</aside>
+
+<!-- 图源选择 -->
+<div id="layersPop" class="glass pop" hidden>
+  <div class="pop-title">卫星图源</div>
+  <div id="srcList"></div>
+  <details class="addsrc">
+    <summary>＋ 添加自定义图源</summary>
+    <input id="nsName" placeholder="名称，例如：天地图影像">
+    <input id="nsUrl" placeholder="https://…/{z}/{x}/{y}  支持 {s} {q} {-y}">
+    <div class="row2">
+      <label>原生最大级 <input id="nsMax" type="number" value="19" min="1" max="22"></label>
+      <label>坐标 <select id="nsCrs"><option value="wgs">WGS-84</option><option value="gcj">GCJ-02</option></select></label>
+    </div>
+    <button class="pill primary" id="nsAdd">添加</button>
+  </details>
+</div>
+
+<div id="empty" class="glass" hidden>
+  <img src="icons/icon-192.png" alt="">
+  <h2>把你的路，铺在卫星图上</h2>
+  <p>选择存放 GPX 的文件夹（两步路、六只脚导出的都行）。导入后保存在本机，下次打开直接显示最近一条。</p>
+  <div class="imp">
+    <button class="pill primary" id="eDir">选择文件夹</button>
+    <button class="pill" id="eFiles">选择文件</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+<input type="file" id="inFiles" multiple hidden>
+<input type="file" id="inDir" webkitdirectory multiple hidden>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
